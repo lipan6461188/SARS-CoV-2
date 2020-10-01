@@ -3,6 +3,11 @@ from Bio import AlignIO
 from Bio.Alphabet import generic_rna
 import Structure, General
 
+wuhan_id = 'NC_045512.2'
+virus_seq = General.load_fasta('/Share2/home/zhangqf7/lipan/SARS2/sequence/SARS2.fa')[wuhan_id]
+virus_shape = General.load_shape('/Share2/home/zhangqf7/lipan/SARS2/icSHAPE/2020-06-01-process/virus-w50.shape')[wuhan_id]
+virus_dot = General.load_dot('/Share2/home/zhangqf7/lipan/SARS2/predict_structure/SARS2/SARS2.dot')[wuhan_id][1]
+
 def remove_lowporb_bp(prob_list, dot, minprob=0.6, minDist=100):
     """
     prob_list:          [(1,19,0.99211), ...]
@@ -206,6 +211,32 @@ def call_covariation_split(fullseq, fulldot, seqdbFn, workdir_root, nohmm=True):
     return all_covary_bps
 
 
+def read_ORF():
+    # /Share2/home/zhangqf7/Jbrowser/SARS2/SARS2.gff
+    ORF = {
+        '5\'UTR': [1, 265],
+        'ORF1ab': [266, 21555],
+        'S': [21563, 25384],
+        'ORF3a': [25393, 26220],
+        'E': [26245, 26472],
+        'M': [26523, 27191],
+        'ORF6': [27202, 27387],
+        'ORF7a': [27394, 27759],
+        'ORF7b': [27756, 27887],
+        'ORF8': [27894, 28259],
+        'N': [28274, 29533],
+        'ORF10': [29558, 29674],
+        '3\'UTR': [29675, 29903]
+    }
+    return ORF
+
+def annotate_region(start, end):
+    region_list = []
+    ORF = read_ORF()
+    for name in ORF:
+        if ORF[name][0]<end and start<ORF[name][1]:
+            region_list.append(name)
+    return " ".join(region_list)
 
 #stoFn = "/Share2/home/zhangqf7/lipan/SARS2/predict_structure/SARS2/UTR_fitting/3UTR_search.sto"
 #Rscape_file = "/Share2/home/zhangqf7/lipan/SARS2/predict_structure/SARS2/UTR_fitting/3UTR_Rscape/3UTR_search_1.sorted.cov"
